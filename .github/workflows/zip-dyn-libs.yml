@@ -53,8 +53,11 @@ jobs:
           # TODO point at the eigerco repo
           # TODO get a PAT
           # Fine-grained PAT permissions:
-          #  - Actions: write permission on the target repository
           #  - Metadata: read permission on the target repository
+          #  - Contents: repository permissions (write)
+          # TODO This might work by targeting the workflow file directly, it would require lighter permissions:
+          # POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches
+          #  - Actions: write permission on the target repository
           curl -f -X POST \
             -H "Authorization: token ${{ secrets.RELAYER_DISPATCH_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
