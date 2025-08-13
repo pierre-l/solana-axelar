@@ -39,8 +39,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
-          tag_name: dyn-libs-${{ github.sha }}
-          name: Dynamic Libraries Release ${{ github.sha }}
+          tag_name: dyn-libs-${{ steps.commit.outputs.short_sha }}
+          name: Dynamic Libraries ${{ steps.commit.outputs.short_sha }}
           body: |
             Dynamic libraries built from commit ${{ github.sha }}
             
