@@ -1,0 +1,51 @@
+name: Release Dynamic Libraries
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release-dyn-libs:
+    runs-on: self-hosted
+    name: Build and Release Dynamic Libraries
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup repo
+        uses: ./.github/actions/setup-repo
+
+      - name: Build dynamic libraries
+        run: cargo xtask build
+
+      - name: Get short commit hash
+        id: commit
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create release archive
+        run: |
+          cd target/deploy
+          zip -r ../../solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip *.so
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
+          tag_name: dyn-libs-${{ github.sha }}
+          name: Dynamic Libraries Release ${{ github.sha }}
+          body: |
+            Dynamic libraries built from commit ${{ github.sha }}
+            
+            This release contains all Solana dynamic libraries (.so files) from target/deploy/
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
