@@ -50,10 +50,12 @@ jobs:
 
       - name: Trigger relayer workflow
         run: |
+          # TODO point at the eigerco repo
+          # TODO get a PAT
           curl -X POST \
             -H "Authorization: token ${{ secrets.RELAYER_DISPATCH_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eigerco/axelar-solana-relayer/dispatches \
+            https://api.github.com/repos/pierre-l/axelar-solana-relayer/dispatches \
             -d '{
               "event_type": "dynamic_libraries_updated",
               "client_payload": {
