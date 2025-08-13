@@ -23,6 +23,7 @@ jobs:
       - name: Setup repo
         uses: ./.github/actions/setup-repo
 
+      # TODO Try to find something cheaper than the whole `cargo xtask build`, we just need the dynamic libraries
       - name: Build dynamic libraries
         run: cargo xtask build
 
@@ -35,7 +36,32 @@ jobs:
           cd target/deploy
           zip -r ../../solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip *.so
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create release
+        uses: softprops/action-gh-release@v1
         with:
-          path: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
+          files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
+          tag_name: dyn-libs-${{ steps.commit.outputs.short_sha }}
+          name: Dynamic Libraries Release ${{ steps.commit.outputs.short_sha }}
+          body: |
+            Dynamic libraries built from commit ${{ github.sha }}
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger relayer workflow
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.RELAYER_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eigerco/axelar-solana-relayer/dispatches \
+            -d '{
+              "event_type": "dynamic_libraries_updated",
+              "client_payload": {
+                "repository": "${{ github.repository }}",
+                "release_tag": "dyn-libs-${{ steps.commit.outputs.short_sha }}",
+                "commit_sha": "${{ github.sha }}",
+                "short_sha": "${{ steps.commit.outputs.short_sha }}",
+                "download_url": "https://github.com/${{ github.repository }}/releases/download/dyn-libs-${{ steps.commit.outputs.short_sha }}/solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip"
+              }
+            }'
+            # TODO Print the URL of the triggered workflow run
