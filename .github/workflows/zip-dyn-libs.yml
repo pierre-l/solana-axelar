@@ -1,7 +1,7 @@
-name: Release Dynamic Libraries
+name: Build Dynamic Libraries
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -35,8 +35,8 @@ jobs:
           cd target/deploy
           zip -r ../../solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip *.so
 
-      - name: Create release
-        uses: softprops/action-gh-release@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
           files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
           tag_name: dyn-libs-${{ github.sha }}
