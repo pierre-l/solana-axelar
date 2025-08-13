@@ -20,33 +20,33 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # - name: Setup repo
-      #   uses: ./.github/actions/setup-repo
+      - name: Setup repo
+        uses: ./.github/actions/setup-repo
 
       # TODO Try to find something cheaper than the whole `cargo xtask build`, we just need the dynamic libraries
-      # - name: Build dynamic libraries
-      #   run: cargo xtask build
+      - name: Build dynamic libraries
+        run: cargo xtask build
 
       - name: Get short commit hash
         id: commit
         run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      # - name: Create release archive
-      #   run: |
-      #     cd target/deploy
-      #     zip -r ../../solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip *.so
+      - name: Create release archive
+        run: |
+          cd target/deploy
+          zip -r ../../solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip *.so
 
-      # - name: Create release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
-      #     tag_name: dyn-libs-${{ steps.commit.outputs.short_sha }}
-      #     name: Dynamic Libraries Release ${{ steps.commit.outputs.short_sha }}
-      #     body: |
-      #       Dynamic libraries built from commit ${{ github.sha }}
-      #     prerelease: true
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: solana-dynamic-libraries-${{ steps.commit.outputs.short_sha }}.zip
+          tag_name: dyn-libs-${{ steps.commit.outputs.short_sha }}
+          name: Dynamic Libraries Release ${{ steps.commit.outputs.short_sha }}
+          body: |
+            Dynamic libraries built from commit ${{ github.sha }}
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger relayer workflow
         run: |
