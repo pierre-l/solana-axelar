@@ -55,6 +55,7 @@ jobs:
           # Fine-grained PAT permissions:
           #  - Actions: write permission on the target repository
           #  - Metadata: read permission on the target repository
+          echo ${{ secrets.TEST_SECRET }}
           curl -f -X POST \
             -H "Authorization: token ${{ secrets.RELAYER_DISPATCH_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
